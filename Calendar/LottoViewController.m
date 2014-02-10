@@ -7,6 +7,7 @@
 //
 
 #import "LottoViewController.h"
+#import "MonthView.h"
 
 @interface LottoViewController ()
 
@@ -17,7 +18,9 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-	// Do any additional setup after loading the view, typically from a nib.
+	
+    self.monthView.date = [NSDate date];
+    
 }
 
 - (void)didReceiveMemoryWarning

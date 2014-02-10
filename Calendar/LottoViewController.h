@@ -8,6 +8,9 @@
 
 #import <UIKit/UIKit.h>
 
+@class MonthView;
+
 @interface LottoViewController : UIViewController
+@property (weak, nonatomic) IBOutlet MonthView *monthView;
 
 @end

@@ -22,6 +22,7 @@
 		55B9BC2F18A80AE200A0E148 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 55B9BC0E18A80AE100A0E148 /* UIKit.framework */; };
 		55B9BC3718A80AE200A0E148 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 55B9BC3518A80AE200A0E148 /* InfoPlist.strings */; };
 		55B9BC3918A80AE200A0E148 /* CalendarTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 55B9BC3818A80AE200A0E148 /* CalendarTests.m */; };
+		55B9BC4418A80DA200A0E148 /* MonthView.m in Sources */ = {isa = PBXBuildFile; fileRef = 55B9BC4318A80DA200A0E148 /* MonthView.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -55,6 +56,8 @@
 		55B9BC3418A80AE200A0E148 /* CalendarTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "CalendarTests-Info.plist"; sourceTree = "<group>"; };
 		55B9BC3618A80AE200A0E148 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		55B9BC3818A80AE200A0E148 /* CalendarTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CalendarTests.m; sourceTree = "<group>"; };
+		55B9BC4218A80DA200A0E148 /* MonthView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MonthView.h; sourceTree = "<group>"; };
+		55B9BC4318A80DA200A0E148 /* MonthView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MonthView.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -120,6 +123,8 @@
 				55B9BC1F18A80AE100A0E148 /* Main_iPad.storyboard */,
 				55B9BC2218A80AE100A0E148 /* LottoViewController.h */,
 				55B9BC2318A80AE100A0E148 /* LottoViewController.m */,
+				55B9BC4218A80DA200A0E148 /* MonthView.h */,
+				55B9BC4318A80DA200A0E148 /* MonthView.m */,
 				55B9BC2518A80AE100A0E148 /* Images.xcassets */,
 				55B9BC1118A80AE100A0E148 /* Supporting Files */,
 			);
@@ -257,6 +262,7 @@
 				55B9BC2418A80AE100A0E148 /* LottoViewController.m in Sources */,
 				55B9BC1718A80AE100A0E148 /* main.m in Sources */,
 				55B9BC1B18A80AE100A0E148 /* LottoAppDelegate.m in Sources */,
+				55B9BC4418A80DA200A0E148 /* MonthView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
