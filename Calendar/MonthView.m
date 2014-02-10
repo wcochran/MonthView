@@ -85,6 +85,15 @@
     NSLog(@"month ='%@'", self.monthYearString);
     NSLog(@"previous month days = %d", self.numberOfDaysInPreviousMonth);
     
+    const CGFloat margin = 2;
+    const CGFloat size = MIN(self.bounds.size.width,self.bounds.size.height) - margin;
+    const CGRect contentRect = CGRectMake((self.bounds.size.width - size)/2,
+                                          (self.bounds.size.height - size)/2,
+                                          size, size);
+    CGContextSaveGState(context);
+    CGContextTranslateCTM(context, contentRect.origin.x, contentRect.origin.y);
+    CGContextScaleCTM(context, size/700, size/700);
+    
     //UIFont *font = [UIFont boldSystemFontOfSize:30];
     UIFont *font = [UIFont fontWithName:@"Helvetica" size:30];
     NSMutableParagraphStyle *paragraphStyle = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
@@ -177,10 +186,10 @@
             r++;
         } else {
             c++;
-        }        
+        }
     }
     
-
+    CGContextRestoreGState(context);
 }
 
 
