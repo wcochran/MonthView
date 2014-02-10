@@ -73,20 +73,52 @@
     self.monthYearString = [dateFormatter stringFromDate:self.date];
 }
 
+#define MARGIN 2
+
+//
+// Draws month in largest possible square centered in view.
+// Month is laid on on a 7x7 grid; the top row contains Month/Year title
+// and 7 column headers for the for the days of the week.
+// The last 6 rows (bottom 6x7 portion of the grid) contains 42 days
+// which covers the month specified in 'self.date' as well as 0 to 6 days
+// of the previous month and as many days of the next month fill in
+// the last 1 or 2 rows.
+// We assume the drawing region is a 700x700 square and modify the
+// Current Modeling Transformation (CTM) to map this to a square that
+// fite comfortable winthin the view.
+//
 - (void)drawRect:(CGRect)rect
 {
-    CGContextRef context = UIGraphicsGetCurrentContext();
+    //
+    // Make sure 'self.date' is set to something.
+    //
+    if (self.date == nil) {
+        self.date = [NSDate date];
+        [self fetchMonthInfo];
+    }
     
+    //
+    // Lazily fetch month info need for rendering.
+    //
     if (self.monthYearString == nil)
         [self fetchMonthInfo];
     
-    NSLog(@"month start day of week = %d", self.startDayOfWeek);
-    NSLog(@"number of days in month = %d", self.numberOfDays);
-    NSLog(@"month ='%@'", self.monthYearString);
-    NSLog(@"previous month days = %d", self.numberOfDaysInPreviousMonth);
+//    NSLog(@"month start day of week = %d", self.startDayOfWeek);
+//    NSLog(@"number of days in month = %d", self.numberOfDays);
+//    NSLog(@"month ='%@'", self.monthYearString);
+//    NSLog(@"previous month days = %d", self.numberOfDaysInPreviousMonth);
     
-    const CGFloat margin = 2;
-    const CGFloat size = MIN(self.bounds.size.width,self.bounds.size.height) - margin;
+    //
+    // Use Core Graphics to render month view.
+    //
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    
+    //
+    // Find the largest square that can fit in the current view and
+    // center it.
+    // Modify the CTM so that our 700 x 700 drawing maps to this square.
+    //
+    const CGFloat size = MIN(self.bounds.size.width,self.bounds.size.height) - MARGIN;
     const CGRect contentRect = CGRectMake((self.bounds.size.width - size)/2,
                                           (self.bounds.size.height - size)/2,
                                           size, size);
@@ -94,6 +126,9 @@
     CGContextTranslateCTM(context, contentRect.origin.x, contentRect.origin.y);
     CGContextScaleCTM(context, size/700, size/700);
     
+    //
+    // Construct text attributes used to render title, days of the week, and days.
+    //
     //UIFont *font = [UIFont boldSystemFontOfSize:30];
     UIFont *font = [UIFont fontWithName:@"Helvetica" size:30];
     NSMutableParagraphStyle *paragraphStyle = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
@@ -103,11 +138,17 @@
                                   NSForegroundColorAttributeName: [UIColor blackColor],
                                   NSParagraphStyleAttributeName: paragraphStyle };
     
+    //
+    // Draw Month/Year title.
+    //
     const CGSize headTextSize = [self.monthYearString sizeWithAttributes:attributes];
     const CGRect headRect = CGRectMake((700 - headTextSize.width)/2, (50 - headTextSize.height)/2,
                                        headTextSize.width, headTextSize.height);
     [self.monthYearString drawInRect:headRect withAttributes:attributes];
     
+    //
+    // Draw days of week.
+    //
     NSArray *dowStrings = @[@"Sun", @"Mon", @"Tue", @"Wed", @"Thu", @"Fri", @"Sat"];
     for (int c = 0; c < 7; c++) {
         NSString *dow = [dowStrings objectAtIndex:c];
@@ -117,6 +158,9 @@
         [dow drawInRect:dowRect withAttributes:attributes];
     }
     
+    //
+    // Draw background 7x6 grid to holds month days.
+    //
     CGContextSetRGBStrokeColor(context, 0, 0, 0, 1);
     CGContextSetLineWidth(context, 0.5);
     for (int r = 1; r < 8; r++) {
@@ -130,6 +174,9 @@
         CGContextStrokePath(context);
     }
     
+    //
+    // Draw numbers and boxes for days of current month.
+    //
     CGContextSetLineWidth(context, 4);
     CGContextSetRGBStrokeColor(context, 0, 0, 0, 1);
     int r = 1;
@@ -151,9 +198,16 @@
         }
     }
     
+    //
+    // Pick light attributes to be used for drawing days of previous
+    // and next month.
+    //
     NSDictionary *lightAttributes = @{ NSFontAttributeName: font,
                                        NSForegroundColorAttributeName: [UIColor grayColor],
                                        NSParagraphStyleAttributeName: paragraphStyle };
+    //
+    // Draw days of previous month.
+    //
     if (self.startDayOfWeek > 1) {
         const int n = self.startDayOfWeek - 1;
         int day = self.numberOfDaysInPreviousMonth - n + 1;
@@ -169,6 +223,9 @@
         }
     }
     
+    //
+    // Draw days of next month.
+    //
     const int daysCovered = self.numberOfDays + self.startDayOfWeek - 1;
     const int daysLeft = 7*6 - daysCovered;
     c = daysCovered % 7;
@@ -189,6 +246,9 @@
         }
     }
     
+    //
+    // Restore CG state.
+    //
     CGContextRestoreGState(context);
 }
 
