@@ -141,6 +141,45 @@
             c++;
         }
     }
+    
+    NSDictionary *lightAttributes = @{ NSFontAttributeName: font,
+                                       NSForegroundColorAttributeName: [UIColor grayColor],
+                                       NSParagraphStyleAttributeName: paragraphStyle };
+    if (self.startDayOfWeek > 1) {
+        const int n = self.startDayOfWeek - 1;
+        int day = self.numberOfDaysInPreviousMonth - n + 1;
+        for (int c = 0; c < n; c++) {
+            const CGRect monthRect = CGRectMake(c*100, 100, 100, 100);
+            NSString *dayStr = [NSString stringWithFormat:@"%d", day];
+            const CGSize dsize = [dayStr sizeWithAttributes:lightAttributes];
+            const CGRect drect = CGRectMake(monthRect.origin.x + (50 - dsize.width)/2,
+                                            monthRect.origin.y + (50 - dsize.height)/2,
+                                            dsize.width, dsize.height);
+            [dayStr drawInRect:drect withAttributes:lightAttributes];
+            day++;
+        }
+    }
+    
+    const int daysCovered = self.numberOfDays + self.startDayOfWeek - 1;
+    const int daysLeft = 7*6 - daysCovered;
+    c = daysCovered % 7;
+    r = daysCovered / 7 + 1;
+    for (int day = 1; day <= daysLeft; day++) {
+        const CGRect monthRect = CGRectMake(c*100, r*100, 100, 100);
+        NSString *dayStr = [NSString stringWithFormat:@"%d", day];
+        const CGSize dsize = [dayStr sizeWithAttributes:lightAttributes];
+        const CGRect drect = CGRectMake(monthRect.origin.x + (50 - dsize.width)/2,
+                                        monthRect.origin.y + (50 - dsize.height)/2,
+                                        dsize.width, dsize.height);
+        [dayStr drawInRect:drect withAttributes:lightAttributes];
+        if (c == 6) {
+            c = 0;
+            r++;
+        } else {
+            c++;
+        }        
+    }
+    
 
 }
 
