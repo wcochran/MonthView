@@ -12,9 +12,12 @@
 
 @property (strong, nonatomic) NSDate *date;
 
-@property (copy, nonatomic) NSString *monthYearString;
-@property (assign, nonatomic) NSInteger startDayOfWeek;
-@property (assign, nonatomic) NSInteger numberOfDays;
-@property (assign, nonatomic) NSInteger numberOfDaysInPreviousMonth;
+//@property (copy, nonatomic) NSString *monthYearString;
+//
+//@property (assign, nonatomic) NSInteger month;
+//@property (assign, nonatomic) NSInteger day;
+//@property (assign, nonatomic) NSInteger startDayOfWeek;
+//@property (assign, nonatomic) NSInteger numberOfDays;
+//@property (assign, nonatomic) NSInteger numberOfDaysInPreviousMonth;
 
 @end

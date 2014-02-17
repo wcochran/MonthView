@@ -17,7 +17,20 @@
 
 @end
 
-@implementation MonthView
+@implementation MonthView {
+    NSString *_monthYearString;
+    
+    NSInteger _month;
+    NSInteger _year;
+    NSInteger _startDayOfWeek;
+    NSInteger _numberOfDays;
+    NSInteger _numberOfDaysInPreviousMonth;
+    
+    NSInteger _selectedDay;
+    NSInteger _selectedMonth;
+    NSInteger _selectedYear;
+    
+}
 
 - (id)initWithFrame:(CGRect)frame
 {
@@ -47,12 +60,35 @@
     const int row = floor((tapPoint.y - contentRect.origin.y)/gridSquareSize.height);
     const int col = floor((tapPoint.x - contentRect.origin.x)/gridSquareSize.width);
     
-    NSLog(@"row = %d, col = %d", row, col);
     if (row <= 0 || row > 6 || col < 0 || col > 6)
         return;
     
-    const int N = 7*(row-1) + col - self.startDayOfWeek + 1;
-    NSLog(@"N = %d", N);
+    const int N = 7*(row-1) + col - _startDayOfWeek + 1;
+    if (N < 0) {
+        if (_month == 1) {
+            _selectedMonth = 12;
+            _selectedYear = _year - 1;
+        } else {
+            _selectedMonth = _month - 1;
+            _selectedYear = _year;
+        }
+        _selectedDay = _numberOfDaysInPreviousMonth + N + 1;
+    } else if (N >= _numberOfDays) {
+        if (_month == 12) {
+            _selectedMonth = 1;
+            _selectedYear = _year + 1;
+        } else {
+            _selectedMonth = _month + 1;
+            _selectedYear = _year;
+        }
+        _selectedDay = N - _numberOfDays + 1;
+    } else {
+        _selectedMonth = _month;
+        _selectedYear = _year;
+        _selectedDay = N + 1;
+    }
+    NSLog(@"selected year/month/day = %d/%d/%d", _selectedYear, _selectedMonth, _selectedDay);
+    
 }
 
 -(void)installTapGestureRecognizer {
@@ -75,21 +111,21 @@
     NSDate *firstDayOfMonth = [calendar dateFromComponents:dateComponents];
     dateComponents = [calendar components:(NSWeekdayCalendarUnit | NSMonthCalendarUnit | NSYearCalendarUnit)
                                  fromDate:firstDayOfMonth];
-    self.startDayOfWeek = [dateComponents weekday];
+    _startDayOfWeek = [dateComponents weekday];
     
     
     //
     // Get number of days in previous month.
     //
-    const NSInteger year = [dateComponents year];
-    const NSInteger month = [dateComponents month];
-    const NSInteger previousMonthNum = (month == 1) ? 12 : (month - 1);
-    const NSInteger previousMonthYear = (previousMonthNum == 12) ? year - 1 : year;
+    _year = [dateComponents year];
+    _month = [dateComponents month];
+    const NSInteger previousMonthNum = (_month == 1) ? 12 : (_month - 1);
+    const NSInteger previousMonthYear = (previousMonthNum == 12) ? _year - 1 : _year;
     dateComponents.month = previousMonthNum;
     dateComponents.year = previousMonthYear;
     NSDate *previousMonth = [calendar dateFromComponents:dateComponents];
     NSRange previousMonthDays = [calendar rangeOfUnit:NSDayCalendarUnit inUnit:NSMonthCalendarUnit forDate:previousMonth];
-    self.numberOfDaysInPreviousMonth = previousMonthDays.length;
+    _numberOfDaysInPreviousMonth = previousMonthDays.length;
     
     
     //
@@ -98,7 +134,7 @@
     NSRange days = [calendar rangeOfUnit:NSDayCalendarUnit
                                   inUnit:NSMonthCalendarUnit
                                  forDate:self.date];
-    self.numberOfDays = days.length;
+    _numberOfDays = days.length;
     
     
     //
@@ -106,7 +142,7 @@
     //
     NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
     dateFormatter.dateFormat = @"MMMM YYYY";
-    self.monthYearString = [dateFormatter stringFromDate:self.date];
+    _monthYearString = [dateFormatter stringFromDate:self.date];
 }
 
 #define MARGIN 2
@@ -144,7 +180,7 @@
     //
     // Lazily fetch month info need for rendering.
     //
-    if (self.monthYearString == nil)
+    if (_monthYearString == nil)
         [self fetchMonthInfo];
     
 //    NSLog(@"month start day of week = %d", self.startDayOfWeek);
@@ -184,10 +220,10 @@
     //
     // Draw Month/Year title.
     //
-    const CGSize headTextSize = [self.monthYearString sizeWithAttributes:attributes];
+    const CGSize headTextSize = [_monthYearString sizeWithAttributes:attributes];
     const CGRect headRect = CGRectMake((700 - headTextSize.width)/2, (50 - headTextSize.height)/2,
                                        headTextSize.width, headTextSize.height);
-    [self.monthYearString drawInRect:headRect withAttributes:attributes];
+    [_monthYearString drawInRect:headRect withAttributes:attributes];
     
     //
     // Draw days of week.
@@ -223,8 +259,8 @@
     CGContextSetLineWidth(context, 4);
     CGContextSetRGBStrokeColor(context, 0, 0, 0, 1);
     int r = 1;
-    int c = self.startDayOfWeek - 1;
-    for (int d = 1; d <= self.numberOfDays; d++) {
+    int c = _startDayOfWeek - 1;
+    for (int d = 1; d <= _numberOfDays; d++) {
         const CGRect monthRect = CGRectMake(c*100, r*100, 100, 100);
         CGContextStrokeRect(context, monthRect);
         NSString *dayStr = [NSString stringWithFormat:@"%d", d];
@@ -251,9 +287,9 @@
     //
     // Draw days of previous month.
     //
-    if (self.startDayOfWeek > 1) {
-        const int n = self.startDayOfWeek - 1;
-        int day = self.numberOfDaysInPreviousMonth - n + 1;
+    if (_startDayOfWeek > 1) {
+        const int n = _startDayOfWeek - 1;
+        int day = _numberOfDaysInPreviousMonth - n + 1;
         for (int c = 0; c < n; c++) {
             const CGRect monthRect = CGRectMake(c*100, 100, 100, 100);
             NSString *dayStr = [NSString stringWithFormat:@"%d", day];
@@ -269,7 +305,7 @@
     //
     // Draw days of next month.
     //
-    const int daysCovered = self.numberOfDays + self.startDayOfWeek - 1;
+    const int daysCovered = _numberOfDays + _startDayOfWeek - 1;
     const int daysLeft = 7*6 - daysCovered;
     c = daysCovered % 7;
     r = daysCovered / 7 + 1;
