@@ -7,9 +7,12 @@
 //
 
 #import "MonthView.h"
+#include <math.h>
 
 @interface MonthView ()
 
+-(CGRect)contentRect;
+-(void)installTapGestureRecognizer;
 -(void)fetchMonthInfo;
 
 @end
@@ -20,9 +23,42 @@
 {
     self = [super initWithFrame:frame];
     if (self) {
-        // Initialization code
+        [self installTapGestureRecognizer];
     }
     return self;
+}
+
+-(id)initWithCoder:(NSCoder *)aDecoder {
+    self = [super initWithCoder:aDecoder];
+    if (self) {
+        [self installTapGestureRecognizer];
+    }
+    return self;
+}
+
+//
+// The Calender is laid out on a 7x7 grid inside the 'contentRect' within the view.
+// Only the bottom 6 rows represent 6x7 = 42 selectable days.
+//
+-(void)handleTap:(UITapGestureRecognizer*)tapGestureRecognizer {
+    const CGPoint tapPoint = [tapGestureRecognizer locationInView:self];
+    const CGRect contentRect = [self contentRect];
+    const CGSize gridSquareSize = CGSizeMake(contentRect.size.width/7, contentRect.size.height/7);
+    const int row = floor((tapPoint.y - contentRect.origin.y)/gridSquareSize.height);
+    const int col = floor((tapPoint.x - contentRect.origin.x)/gridSquareSize.width);
+    
+    NSLog(@"row = %d, col = %d", row, col);
+    if (row <= 0 || row > 6 || col < 0 || col > 6)
+        return;
+    
+    const int N = 7*(row-1) + col - self.startDayOfWeek + 1;
+    NSLog(@"N = %d", N);
+}
+
+-(void)installTapGestureRecognizer {
+    UITapGestureRecognizer *tapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
+    tapGestureRecognizer.numberOfTapsRequired = 1;
+    [self addGestureRecognizer:tapGestureRecognizer];
 }
 
 -(void)fetchMonthInfo {
@@ -75,6 +111,14 @@
 
 #define MARGIN 2
 
+-(CGRect)contentRect {
+    const CGFloat size = MIN(self.bounds.size.width,self.bounds.size.height) - MARGIN;
+    const CGRect contentRect = CGRectMake((self.bounds.size.width - size)/2,
+                                          (self.bounds.size.height - size)/2,
+                                          size, size);
+    return contentRect;
+}
+
 //
 // Draws month in largest possible square centered in view.
 // Month is laid on on a 7x7 grid; the top row contains Month/Year title
@@ -119,9 +163,8 @@
     // Modify the CTM so that our 700 x 700 drawing maps to this square.
     //
     const CGFloat size = MIN(self.bounds.size.width,self.bounds.size.height) - MARGIN;
-    const CGRect contentRect = CGRectMake((self.bounds.size.width - size)/2,
-                                          (self.bounds.size.height - size)/2,
-                                          size, size);
+    const CGRect contentRect = [self contentRect];
+    
     CGContextSaveGState(context);
     CGContextTranslateCTM(context, contentRect.origin.x, contentRect.origin.y);
     CGContextScaleCTM(context, size/700, size/700);
